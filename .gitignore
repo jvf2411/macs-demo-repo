@@ -1,0 +1,16 @@
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/crash.log
+
+# .NET
+backend/bin/
+backend/obj/
+
+# Node / frontend
+node_modules/
+
+# Docker / temporales
+*.log
+.env

@@ -1,0 +1,45 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-2"
+    AWS_ACCOUNT_ID: "376210054463"
+    BACKEND_REPOSITORY_NAME: "macs-demo-backend"
+    FRONTEND_REPOSITORY_NAME: "macs-demo-frontend"
+
+phases:
+  pre_build:
+    commands:
+      - echo "Autenticando Docker contra Amazon ECR..."
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - BACKEND_REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$BACKEND_REPOSITORY_NAME
+      - FRONTEND_REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$FRONTEND_REPOSITORY_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo "IMAGE_TAG=$IMAGE_TAG"
+
+  build:
+    commands:
+      - echo "Construyendo imagen Docker del backend .NET..."
+      - docker build -t $BACKEND_REPOSITORY_URI:$IMAGE_TAG -f backend/Dockerfile backend
+      - docker tag $BACKEND_REPOSITORY_URI:$IMAGE_TAG $BACKEND_REPOSITORY_URI:latest
+
+      - echo "Construyendo imagen Docker del frontend para ECS..."
+      - docker build -t $FRONTEND_REPOSITORY_URI:$IMAGE_TAG -f frontend/Dockerfile.ecs frontend
+      - docker tag $FRONTEND_REPOSITORY_URI:$IMAGE_TAG $FRONTEND_REPOSITORY_URI:latest
+
+  post_build:
+    commands:
+      - echo "Publicando imágenes en Amazon ECR..."
+      - docker push $BACKEND_REPOSITORY_URI:$IMAGE_TAG
+      - docker push $BACKEND_REPOSITORY_URI:latest
+      - docker push $FRONTEND_REPOSITORY_URI:$IMAGE_TAG
+      - docker push $FRONTEND_REPOSITORY_URI:latest
+
+      - echo "Generando archivo imagedefinitions.json para despliegue en ECS..."
+      - printf '[{"name":"macs-frontend","imageUri":"%s"},{"name":"macs-backend","imageUri":"%s"}]' $FRONTEND_REPOSITORY_URI:$IMAGE_TAG $BACKEND_REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+      - cat imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json

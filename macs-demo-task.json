@@ -1,0 +1,88 @@
+{
+  "family": "macs-demo-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "executionRoleArn": "arn:aws:iam::376210054463:role/ecsTaskExecutionRole",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "containerDefinitions": [
+    {
+      "name": "macs-frontend",
+      "image": "376210054463.dkr.ecr.us-east-2.amazonaws.com/macs-demo-frontend:ecs-20260627-2115",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "dependsOn": [
+        {
+          "containerName": "macs-backend",
+          "condition": "START"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/macs-demo",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "frontend"
+        }
+      }
+    },
+    {
+      "name": "macs-backend",
+      "image": "376210054463.dkr.ecr.us-east-2.amazonaws.com/macs-demo-backend:ecs-20260627-2115",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [
+        {
+          "name": "ASPNETCORE_ENVIRONMENT",
+          "value": "Development"
+        },
+        {
+          "name": "ASPNETCORE_URLS",
+          "value": "http://+:8080"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "172.31.15.76"
+        },
+        {
+          "name": "DB_PORT",
+          "value": "1433"
+        },
+        {
+          "name": "DB_NAME",
+          "value": "MACS_DEMO"
+        },
+        {
+          "name": "DB_USER",
+          "value": "sa"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "value": "YourStrong!Passw0rd"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/macs-demo",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "backend"
+        }
+      }
+    }
+  ]
+}

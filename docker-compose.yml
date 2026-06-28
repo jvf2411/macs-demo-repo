@@ -1,0 +1,51 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: macs-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - macs-network
+
+ 
+  backend:
+    build:
+      context: ./backend
+    container_name: macs-backend
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      DB_USER: sa
+      DB_PASSWORD: YourStrong!Passw0rd
+      DB_HOST: sqlserver
+      DB_PORT: 1433
+      DB_NAME: MACS_DEMO
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+    networks:
+      - macs-network
+  frontend:
+    build:
+      context: ./frontend
+    container_name: macs-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - macs-network
+
+volumes:
+  sqlserver_data:
+
+networks:
+  macs-network:
+    driver: bridge

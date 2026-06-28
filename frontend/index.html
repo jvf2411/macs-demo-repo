@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MACS - Prototipo de Laboratorio</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <section id="loginPage" class="login-page">
+    <div class="login-box">
+      <h1 class="macs-watermark">MACS</h1>
+      <h2>Bienvenido</h2>
+      <p>Aplicación para manejo de nutriciones</p>
+
+      <form id="loginForm">
+        <input type="text" id="usuario" placeholder="Usuario" required />
+        <input type="password" id="password" placeholder="Contraseña" required />
+        <button type="submit">Login</button>
+      </form>
+
+      <span class="footer">MACS © 2026</span>
+    </div>
+  </section>
+
+  <section id="appPage" class="app-page hidden">
+    <aside class="sidebar">
+      <h1>MACS</h1>
+      <p>Nutrición clínica</p>
+
+      <nav>
+        <a class="active">Dashboard</a>
+        <a>Solicitudes</a>
+        <a>Pacientes</a>
+        <a>Producción</a>
+        <a>Reportes</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <h2>Panel de solicitudes de nutrición</h2>
+          <p>Prototipo funcional de laboratorio con datos ficticios</p>
+        </div>
+
+        <button id="logoutBtn" class="logout-btn">Cerrar sesión</button>
+      </header>
+
+      <section class="cards">
+        <div class="card">
+          <h3 id="totalSolicitudes">0</h3>
+          <p>Solicitudes registradas</p>
+        </div>
+
+        <div class="card warning">
+          <h3 id="totalUrgentes">0</h3>
+          <p>Solicitudes urgentes</p>
+        </div>
+
+        <div class="card danger">
+          <h3 id="totalCriticas">0</h3>
+          <p>Solicitudes críticas</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h3>Nueva solicitud de nutrición</h3>
+
+        <form id="solicitudForm" class="form-grid">
+          <input type="text" id="paciente" placeholder="Paciente demo" required />
+
+          <select id="tipoNutricion" required>
+            <option value="Enteral">Enteral</option>
+            <option value="Parenteral">Parenteral</option>
+            <option value="Oral">Oral</option>
+          </select>
+
+          <input type="text" id="centroMedico" placeholder="Centro médico demo" required />
+
+          <select id="prioridad" required>
+            <option value="Normal">Normal</option>
+            <option value="Urgente">Urgente</option>
+            <option value="Crítica">Crítica</option>
+          </select>
+
+          <textarea id="observacion" placeholder="Observación"></textarea>
+
+          <button type="submit">Registrar solicitud</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="table-header">
+          <h3>Solicitudes recientes</h3>
+          <button id="refreshBtn">Actualizar</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Paciente</th>
+                <th>Tipo</th>
+                <th>Centro médico</th>
+                <th>Prioridad</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="solicitudesTable">
+              <tr>
+                <td colspan="6">Cargando solicitudes...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
