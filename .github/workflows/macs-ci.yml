@@ -1,0 +1,45 @@
+name: MACS - Integracion continua
+
+on:
+  push:
+    branches: [main, learner-lab-cicd-us-east-1]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macs-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Preparar .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restaurar dependencias backend
+        run: dotnet restore backend/backend.csproj
+
+      - name: Compilar backend
+        run: dotnet build backend/backend.csproj --configuration Release --no-restore
+
+      - name: Construir imagen Docker backend
+        run: docker build --file backend/Dockerfile --tag macs-backend:ci backend
+
+      - name: Construir imagen Docker frontend
+        run: docker build --file frontend/Dockerfile.ecs --tag macs-frontend:ci frontend
+
+      - name: Resumen
+        run: |
+          echo "Validaciones CI completas: .NET y ambas imagenes Docker."
+          echo "No se publica en ECR ni se despliega en ECS."
